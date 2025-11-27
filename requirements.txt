@@ -1,0 +1,21 @@
+# === Core Python libraries ===
+pandas==2.1.4
+numpy==1.26.4
+
+# === Machine Learning ===
+scikit-learn==1.3.2
+joblib==1.3.2
+
+# === App / UI Framework ===
+streamlit==1.32.0
+
+# === File Export (Excel Support) ===
+openpyxl==3.1.2
+xlsxwriter==3.1.9
+
+# === Plotting (optional but recommended) ===
+matplotlib==3.8.2
+
+# === Utility Libraries ===
+python-dateutil==2.8.2
+typing_extensions==4.9.0
