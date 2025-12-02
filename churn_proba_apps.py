@@ -79,35 +79,35 @@ h2, h3 {
 @st.cache_resource
 def load_model():
     try:
-        # Essayer de charger le modèle avec compatibilité
+        # Try to load model with compatibility
         import sklearn
         st.sidebar.info(f"Scikit-learn version: {sklearn.__version__}")
         
-        # Définir la classe manquante pour la compatibilité
+        # Define missing class for compatibility
         try:
             from sklearn.compose._column_transformer import _RemainderColsList
         except ImportError:
-            # Créer une classe factice pour la compatibilité
+            # Create dummy class for compatibility
             class _RemainderColsList(list):
                 def __init__(self, *args, **kwargs):
                     super().__init__(*args, **kwargs)
             
-            # Ajouter à sklearn.compose._column_transformer
+            # Add to sklearn.compose._column_transformer
             import sklearn.compose._column_transformer
             sklearn.compose._column_transformer._RemainderColsList = _RemainderColsList
         
-        # Charger le modèle
+        # Load the model
         model = joblib.load("churn_model.pkl")
-        st.sidebar.success("✅ Modèle chargé avec succès!")
-        return model, True, "Modèle original"
+        st.sidebar.success("✅ Model loaded successfully!")
+        return model, True, "Original Model"
         
     except Exception as e:
-        st.sidebar.error(f"⚠️ Erreur de chargement: {str(e)[:100]}...")
+        st.sidebar.error(f"⚠️ Loading error: {str(e)[:100]}...")
         
-        # Option 1: Créer un modèle de démonstration simple
-        st.sidebar.info("Création d'un modèle de démonstration...")
+        # Option 1: Create a simple demonstration model
+        st.sidebar.info("Creating a demonstration model...")
         
-        # Créer un pipeline de démonstration similaire à ce que le modèle original pourrait être
+        # Create a demonstration pipeline similar to what the original model might be
         numeric_features = ['tenure', 'MonthlyCharges', 'TotalCharges']
         categorical_features = ['Contract', 'InternetService', 'PaymentMethod']
         
@@ -125,7 +125,7 @@ def load_model():
                 ('cat', categorical_transformer, categorical_features)
             ])
         
-        # Créer un pipeline complet
+        # Create a complete pipeline
         demo_model = Pipeline(steps=[
             ('preprocessor', preprocessor),
             ('classifier', RandomForestClassifier(
@@ -136,7 +136,7 @@ def load_model():
             ))
         ])
         
-        # Entraîner avec des données factices
+        # Train with dummy data
         np.random.seed(42)
         n_samples = 100
         X_demo = pd.DataFrame({
@@ -148,13 +148,13 @@ def load_model():
             'PaymentMethod': np.random.choice(['Electronic check', 'Mailed check', 'Bank transfer', 'Credit card'], n_samples)
         })
         
-        y_demo = np.random.binomial(1, 0.3, n_samples)  # 30% de churn
+        y_demo = np.random.binomial(1, 0.3, n_samples)  # 30% churn rate
         
         demo_model.fit(X_demo, y_demo)
         
-        return demo_model, False, "Modèle de démonstration"
+        return demo_model, False, "Demonstration Model"
 
-# Charger le modèle
+# Load the model
 model, model_loaded, model_type = load_model()
 
 # =========================
@@ -162,13 +162,13 @@ model, model_loaded, model_type = load_model()
 # =========================
 st.title("📉 Customer Churn Probability App")
 
-# Afficher le type de modèle
-if model_type == "Modèle de démonstration":
+# Display model type
+if model_type == "Demonstration Model":
     st.markdown(f"""
     <div class="warning-box">
-        <strong>⚠️ MODE DÉMONSTRATION</strong><br>
-        L'application utilise un modèle de démonstration.<br>
-        <small>Raison: Incompatibilité de version scikit-learn (1.6.1 → 1.7.2)</small>
+        <strong>⚠️ DEMONSTRATION MODE</strong><br>
+        The application is using a demonstration model.<br>
+        <small>Reason: Scikit-learn version incompatibility (1.6.1 → 1.7.2)</small>
     </div>
     """, unsafe_allow_html=True)
 else:
@@ -185,19 +185,19 @@ else:
 # =========================
 st.header("📂 Upload Customer Dataset")
 
-# Instructions pour le format de données
-with st.expander("📋 Format de données requis"):
+# Instructions for data format
+with st.expander("📋 Required Data Format"):
     st.markdown("""
-    **Colonnes recommandées (si vous utilisez le modèle de démonstration):**
-    - `tenure`: Durée en mois (numérique)
-    - `MonthlyCharges`: Frais mensuels (numérique)
-    - `TotalCharges`: Frais totaux (numérique)
-    - `Contract`: Type de contrat (catégoriel)
-    - `InternetService`: Service internet (catégoriel)
-    - `PaymentMethod`: Méthode de paiement (catégoriel)
+    **Recommended columns (if using the demonstration model):**
+    - `tenure`: Duration in months (numeric)
+    - `MonthlyCharges`: Monthly fees (numeric)
+    - `TotalCharges`: Total fees (numeric)
+    - `Contract`: Contract type (categorical)
+    - `InternetService`: Internet service (categorical)
+    - `PaymentMethod`: Payment method (categorical)
     
-    **Note:** Si vous utilisez votre propre modèle, assurez-vous que les colonnes
-    correspondent exactement à celles utilisées pendant l'entraînement.
+    **Note:** If using your own model, ensure the columns
+    match exactly those used during training.
     """)
 
 uploaded_file = st.file_uploader("Upload your CSV file", type=["csv"])
@@ -211,85 +211,85 @@ if uploaded_file:
         st.info(f"Dataset shape: {df.shape[0]} rows × {df.shape[1]} columns")
         
         if df.empty:
-            st.error("Le fichier CSV est vide. Veuillez uploader un fichier contenant des données.")
+            st.error("The CSV file is empty. Please upload a file containing data.")
         else:
             try:
-                # Vérifier les colonnes requises pour le modèle de démonstration
-                if model_type == "Modèle de démonstration":
+                # Check required columns for demonstration model
+                if model_type == "Demonstration Model":
                     demo_cols = ['tenure', 'MonthlyCharges', 'TotalCharges', 
                                 'Contract', 'InternetService', 'PaymentMethod']
                     missing_cols = [col for col in demo_cols if col not in df.columns]
                     if missing_cols:
-                        st.warning(f"Colonnes manquantes pour le modèle de démo: {missing_cols}")
-                        st.info("Le modèle fonctionnera avec les colonnes disponibles, mais les résultats peuvent être moins précis.")
+                        st.warning(f"Missing columns for demo model: {missing_cols}")
+                        st.info("The model will work with available columns, but results may be less accurate.")
                 
-                # Prédiction
-                with st.spinner("Calcul des probabilités de churn..."):
+                # Prediction
+                with st.spinner("Calculating churn probabilities..."):
                     try:
                         predictions = model.predict_proba(df)[:, 1]
                         df["Churn_Probability"] = predictions
                         
-                        st.success("✅ Prédictions terminées!")
+                        st.success("✅ Predictions completed!")
                         
-                        # Afficher les résultats
+                        # Display results
                         st.subheader("📈 Churn Predictions")
                         st.dataframe(df[["Churn_Probability"] + list(df.columns[:-1])].head(20))
                         
-                        # Statistiques
+                        # Statistics
                         col1, col2, col3 = st.columns(3)
                         with col1:
                             at_risk = len(df[df["Churn_Probability"] > 0.5])
-                            st.metric("Clients à risque (>50%)", at_risk)
+                            st.metric("At-risk Customers (>50%)", at_risk)
                         with col2:
                             avg_risk = df["Churn_Probability"].mean()
-                            st.metric("Risque moyen", f"{avg_risk:.2%}")
+                            st.metric("Average Risk", f"{avg_risk:.2%}")
                         with col3:
                             max_risk = df["Churn_Probability"].max()
-                            st.metric("Risque maximum", f"{max_risk:.2%}")
+                            st.metric("Maximum Risk", f"{max_risk:.2%}")
                         
-                        # Distribution des risques
-                        st.subheader("📊 Distribution des risques")
+                        # Risk distribution
+                        st.subheader("📊 Risk Distribution")
                         hist_values = np.histogram(df["Churn_Probability"], bins=20, range=(0, 1))[0]
                         st.bar_chart(pd.DataFrame({"count": hist_values}))
                         
-                        # Top 10 clients à risque
-                        st.subheader("🚨 Top 10 Clients à Haut Risque")
+                        # Top 10 high-risk customers
+                        st.subheader("🚨 Top 10 High-Risk Customers")
                         top10 = df.sort_values("Churn_Probability", ascending=False).head(10)
                         st.dataframe(top10[["Churn_Probability"] + list(df.columns[:-1])])
                         
-                        # Bouton de téléchargement
+                        # Download button
                         csv_data = df.to_csv(index=False)
                         st.download_button(
-                            "⬇️ Télécharger les prédictions (CSV)",
+                            "⬇️ Download Predictions (CSV)",
                             csv_data,
                             file_name="churn_predictions.csv",
                             mime="text/csv",
-                            help="Téléchargez toutes les prédictions avec les probabilités de churn"
+                            help="Download all predictions with churn probabilities"
                         )
                         
                     except Exception as e:
-                        st.error(f"Erreur lors de la prédiction: {str(e)}")
+                        st.error(f"Prediction error: {str(e)}")
                         st.info("""
-                        **Solutions possibles:**
-                        1. Vérifiez que vos données ont le bon format
-                        2. Assurez-vous que les colonnes correspondent au modèle
-                        3. Essayez avec moins de données
+                        **Possible solutions:**
+                        1. Check that your data has the correct format
+                        2. Ensure columns match the model
+                        3. Try with less data
                         """)
                         
             except Exception as e:
-                st.error(f"Erreur: {str(e)}")
+                st.error(f"Error: {str(e)}")
                 
     except Exception as e:
-        st.error(f"Erreur lors de la lecture du fichier CSV: {str(e)}")
-        st.info("Assurez-vous que le fichier est un CSV valide et correctement formaté.")
+        st.error(f"Error reading CSV file: {str(e)}")
+        st.info("Make sure the file is a valid and properly formatted CSV.")
 
 # =========================
 # QUICK TEST SECTION
 # =========================
-st.header("🧪 Test Rapide")
-with st.expander("Tester avec des données exemple"):
-    if st.button("Générer des données de test"):
-        # Créer des données de test
+st.header("🧪 Quick Test")
+with st.expander("Test with sample data"):
+    if st.button("Generate test data"):
+        # Create test data
         test_data = pd.DataFrame({
             'tenure': [1, 12, 24, 36, 48],
             'MonthlyCharges': [29.85, 56.95, 89.99, 45.30, 75.50],
@@ -299,31 +299,31 @@ with st.expander("Tester avec des données exemple"):
             'PaymentMethod': ['Electronic check', 'Bank transfer', 'Credit card', 'Mailed check', 'Bank transfer']
         })
         
-        st.write("Données de test générées:")
+        st.write("Generated test data:")
         st.dataframe(test_data)
         
-        # Faire des prédictions
+        # Make predictions
         try:
             predictions = model.predict_proba(test_data)[:, 1]
             test_data["Churn_Probability"] = predictions
-            st.write("Résultats des prédictions:")
+            st.write("Prediction results:")
             st.dataframe(test_data)
         except Exception as e:
-            st.error(f"Erreur lors du test: {str(e)}")
+            st.error(f"Test error: {str(e)}")
 
 # =========================
 # SIDEBAR
 # =========================
 st.sidebar.header("⚙️ Configuration")
-st.sidebar.markdown(f"**Type de modèle:** {model_type}")
+st.sidebar.markdown(f"**Model Type:** {model_type}")
 
-if st.sidebar.checkbox("Afficher les informations techniques"):
-    st.sidebar.write("**Détails du modèle:**")
+if st.sidebar.checkbox("Show technical information"):
+    st.sidebar.write("**Model Details:**")
     st.sidebar.write(f"- Type: {type(model)}")
     if hasattr(model, 'steps'):
-        st.sidebar.write(f"- Étapes: {[name for name, _ in model.steps]}")
+        st.sidebar.write(f"- Steps: {[name for name, _ in model.steps]}")
     
-    st.sidebar.write("**Versions des bibliothèques:**")
+    st.sidebar.write("**Library Versions:**")
     try:
         import sklearn, pandas, numpy
         st.sidebar.write(f"- scikit-learn: {sklearn.__version__}")
@@ -335,15 +335,15 @@ if st.sidebar.checkbox("Afficher les informations techniques"):
 # Instructions
 st.sidebar.header("ℹ️ Instructions")
 st.sidebar.markdown("""
-1. **Préparez vos données** en CSV
-2. **Upload le fichier** dans l'application
-3. **Visualisez** les prédictions
-4. **Téléchargez** les résultats
+1. **Prepare your data** in CSV format
+2. **Upload the file** to the application
+3. **View** the predictions
+4. **Download** the results
 
-**Problèmes courants:**
-- Format CSV incorrect
-- Colonnes manquantes
-- Données manquantes
+**Common issues:**
+- Incorrect CSV format
+- Missing columns
+- Missing data
 """)
 
 # =========================
@@ -351,7 +351,7 @@ st.sidebar.markdown("""
 # =========================
 st.markdown("""
 <div class="footer">
-    Créé avec ❤️ par <strong>Leprince Dongmo</strong> — Propulsé par Machine Learning<br>
-    <small>Pour résoudre l'erreur de compatibilité, utilisez scikit-learn==1.6.1</small>
+    Created with ❤️ by <strong>Leprince Dongmo</strong> — Powered by Machine Learning<br>
+    <small>To fix compatibility error, use scikit-learn==1.6.1</small>
 </div>
 """, unsafe_allow_html=True)
