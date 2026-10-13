@@ -1,136 +1,61 @@
-✅ 2. README FILE (Documentation)
+# Customer Churn Probability App
 
-Below is a professional README you can copy/paste into GitHub or your project documentation.
+Streamlit application that scores bank customers with a Random Forest model and ranks them by churn risk.
 
-📘 README — Customer Churn Prediction Project
-Overview
+- Live app: <https://churnprobaapps-ftuk5k4wd7umfmm5angxsk.streamlit.app/>
+- Project page, notebook and documentation: <https://ldongmon.github.io/> ([repository](https://github.com/ldongmon/ldongmon.github.io))
 
-This project focuses on predicting customer churn using supervised machine learning techniques.
-The goal is to estimate a churn probability for every customer, based on demographic, behavioral, and service-usage features.
+## What the app does
 
-The final model output is intended to support Power BI dashboards, enhance CRM targeting, and improve customer-retention strategies.
+1. Loads `churn_model.pkl`, a scikit-learn pipeline (scaling, one-hot encoding, Random Forest of 300 trees).
+2. Reads an uploaded CSV file of customers.
+3. Returns a churn probability and a risk band for each customer, with a downloadable CSV.
 
-📂 Project Structure
-├── data/
-│   └── classification_customer_dataset.csv
-├── notebooks/
-│   └── churn_modeling.ipynb (optional)
-├── models/
-│   ├── logistic_regression.pkl
-│   └── random_forest.pkl
-├── output/
-│   └── churn_probabilities.csv
-├── churn_report.qmd
-└── README.md
+## Required columns
 
-🔧 Requirements
+Same names as the Kaggle *Bank Customer Churn* dataset. Any other column is kept in the output but ignored by the model.
 
-You need:
+| Column | Type |
+|---|---|
+| `CreditScore`, `Age`, `Tenure`, `Balance`, `NumOfProducts`, `EstimatedSalary`, `Point Earned` | numeric |
+| `HasCrCard`, `IsActiveMember` | 0 or 1 |
+| `Satisfaction Score` | 1 to 5 |
+| `Geography` | France, Spain, Germany |
+| `Gender` | Male, Female |
+| `Card Type` | DIAMOND, GOLD, SILVER, PLATINUM |
 
-Python 3.8+
+## Model performance
 
-Scikit-learn
+Measured on a held-out test set of 2,000 customers (408 churners):
 
-Pandas
+| Metric | Value |
+|---|---|
+| Accuracy | 0.869 (trivial baseline 0.796) |
+| Precision (churn) | 0.80 |
+| Recall (churn) | 0.47 |
+| F1 (churn) | 0.59 |
+| ROC-AUC | 0.867 |
 
-Numpy
+The probabilities are not calibrated: they rank customers reliably, but they are not a literal percentage chance of leaving.
 
-Matplotlib / Seaborn
+## Risk bands
 
-SHAP
+| Band | Probability |
+|---|---|
+| Low risk | below 0.20 |
+| Moderate | 0.20 to 0.40 |
+| High risk | 0.40 to 0.70 |
+| Critical | 0.70 and above |
 
-Install dependencies:
+## Run locally
 
+```bash
 pip install -r requirements.txt
+streamlit run churn_proba_apps.py
+```
 
-📊 Dataset
+`scikit-learn` is pinned to 1.6.1 because `churn_model.pkl` was saved with that version.
 
-The dataset used:
-classification_customer_dataset.csv
+## Contact
 
-Contains typical customer-level features:
-
-Demographics (age, gender, region)
-
-Account usage (visits, transactions…)
-
-Engagement metrics
-
-Service subscription information
-
-A binary target: Churn (0 = no, 1 = yes)
-
-⚙️ Modeling Approach
-
-Two models were trained:
-
-1. Logistic Regression
-
-Serves as an interpretable baseline
-
-Useful to explain the impact of each feature
-
-Produces clear probability outputs
-
-2. Random Forest Classifier
-
-Handles nonlinear patterns
-
-Generally higher predictive performance
-
-More robust to noise and feature interactions
-
-Both models were evaluated using:
-
-Accuracy
-
-Precision
-
-Recall
-
-F1 Score
-
-ROC-AUC
-
-📈 Explainability
-
-SHAP values were generated to identify which features contribute most to churn.
-This helps business teams understand:
-
-Why customers leave
-
-Which attributes increase churn risk
-
-Which segments to target
-
-📤 Export to Power BI
-
-The final dataset containing:
-
-Customer ID
-
-Predicted churn probability
-
-Model classification
-
-…can be exported as .csv and used in Power BI to build:
-
-Risk heatmaps
-
-Customer segmentation
-
-Retention dashboards
-
-🎯 Business Value
-
-Reduce churn through early detection
-
-Improve campaign efficiency
-
-Provide actionable insights for CRM and retention teams
-
-Build data-driven customer strategies
-
-📞 Contact
-
-For questions about the project, feel free to reach out.
+Leprince Dongmo Nanda · <leprince.dongmo@yahoo.fr>

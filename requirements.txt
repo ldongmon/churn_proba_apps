@@ -1,20 +1,9 @@
 # === Core ML Dependencies ===
-numpy>=2.1.0
-pandas>=2.2.3
-scikit-learn>=1.5.0
+# scikit-learn is pinned: churn_model.pkl was saved with this exact version
+scikit-learn==1.6.1
+numpy>=2.1.0,<2.3
+pandas>=2.2.3,<2.4
 joblib>=1.4.2
 
 # === Streamlit App ===
 streamlit>=1.36.0
-
-# === Visualization ===
-matplotlib>=3.9.0
-seaborn>=0.13.2
-
-# === Excel / CSV Export ===
-openpyxl>=3.1.2
-xlsxwriter>=3.1.9
-
-# === Utilities ===
-python-dateutil>=2.8.2
-typing_extensions>=4.9.0
