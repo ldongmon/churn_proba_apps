@@ -8,7 +8,7 @@ import sklearn
 # APP CONFIGURATION
 # =========================
 st.set_page_config(
-    page_title="Leprince Dongmo's Churn Prediction App",
+    page_title="Customer Churn Probability",
     page_icon="📉",
     layout="wide",
 )
@@ -18,18 +18,15 @@ st.set_page_config(
 # =========================
 st.markdown("""
 <style>
-/* Main title color */
 h1 {
     color: #1f4e79;
     text-align: center;
 }
 
-/* Subtitles */
 h2, h3 {
     color: #2e75b6;
 }
 
-/* Custom welcome message */
 .welcome-box {
     padding: 15px;
     background-color: #e8f1fa;
@@ -38,7 +35,6 @@ h2, h3 {
     margin-bottom: 20px;
 }
 
-/* Warning box */
 .warning-box {
     padding: 15px;
     background-color: #fff3cd;
@@ -48,7 +44,6 @@ h2, h3 {
     color: #856404;
 }
 
-/* Error box */
 .error-box {
     padding: 15px;
     background-color: #f8d7da;
@@ -58,7 +53,6 @@ h2, h3 {
     color: #721c24;
 }
 
-/* Footer credit */
 .footer {
     text-align: center;
     margin-top: 50px;
@@ -104,12 +98,12 @@ def load_model():
 try:
     model = load_model()
     features = list(getattr(model, "feature_names_in_", FEATURES))
-    st.sidebar.success("✅ Model loaded successfully!")
+    st.sidebar.success("Model loaded")
 except Exception as e:
-    st.title("📉 Customer Churn Probability App")
+    st.title("Customer Churn Probability")
     st.markdown(f"""
     <div class="error-box">
-        <strong>⚠️ The model could not be loaded.</strong><br>
+        <strong>The model could not be loaded.</strong><br>
         <small>{str(e)[:200]}</small><br>
         <small>Installed scikit-learn: {sklearn.__version__}. The model was saved with the version pinned in requirements.txt.</small>
     </div>
@@ -131,13 +125,12 @@ def score(df):
 # =========================
 # HEADER
 # =========================
-st.title("📉 Customer Churn Probability App")
+st.title("Customer Churn Probability")
 
 st.markdown("""
 <div class="welcome-box">
-    <h3>👋 Welcome to the Churn Probability Platform</h3>
     This application scores bank customers with a Random Forest model and ranks them by churn risk.<br>
-    Upload your dataset and instantly receive a churn probability and a risk band for each customer!
+    Upload a CSV file to get a churn probability and a risk band for each customer.
 </div>
 """, unsafe_allow_html=True)
 
@@ -152,10 +145,9 @@ st.markdown("""
 # =========================
 # FILE UPLOAD SECTION
 # =========================
-st.header("📂 Upload Customer Dataset")
+st.header("Upload customer dataset")
 
-# Instructions for data format
-with st.expander("📋 Required Data Format"):
+with st.expander("Required data format"):
     st.markdown("""
     **Required columns** (same names as the Kaggle *Bank Customer Churn* dataset):
     - `CreditScore`, `Age`, `Tenure`, `Balance`, `NumOfProducts`, `EstimatedSalary`, `Point Earned` (numeric)
@@ -175,7 +167,7 @@ if uploaded_file:
     try:
         df = pd.read_csv(uploaded_file)
 
-        st.subheader("🔍 Data Preview")
+        st.subheader("Data preview")
         st.dataframe(df.head())
         st.info(f"Dataset shape: {df.shape[0]} rows × {df.shape[1]} columns")
 
@@ -188,13 +180,11 @@ if uploaded_file:
                     lead = ["Churn_Probability", "Risk_Level"]
                     others = [col for col in df.columns if col not in lead]
 
-                    st.success("✅ Predictions completed!")
+                    st.success("Predictions completed")
 
-                    # Display results
-                    st.subheader("📈 Churn Predictions")
+                    st.subheader("Churn predictions")
                     st.dataframe(df[lead + others].head(20))
 
-                    # Statistics
                     col1, col2, col3 = st.columns(3)
                     with col1:
                         at_risk = len(df[df["Churn_Probability"] > 0.5])
@@ -207,7 +197,7 @@ if uploaded_file:
                         st.metric("Maximum Score", f"{max_risk:.2f}")
 
                     # Risk bands
-                    st.subheader("📊 Risk Bands")
+                    st.subheader("Risk bands")
                     labels = [label for _, label in RISK_BANDS]
                     counts = df["Risk_Level"].value_counts().reindex(labels, fill_value=0)
                     st.dataframe(pd.DataFrame({
@@ -215,23 +205,20 @@ if uploaded_file:
                         "Share (%)": (counts / len(df) * 100).round(1),
                     }))
 
-                    # Risk distribution
-                    st.subheader("📊 Score Distribution")
+                    st.subheader("Score distribution")
                     hist_values = np.histogram(df["Churn_Probability"], bins=20, range=(0, 1))[0]
                     st.bar_chart(pd.DataFrame(
                         {"count": hist_values},
                         index=[f"{i / 20:.2f}" for i in range(20)],
                     ))
 
-                    # Top 10 high-risk customers
-                    st.subheader("🚨 Top 10 High-Risk Customers")
+                    st.subheader("Top 10 high-risk customers")
                     top10 = df.sort_values("Churn_Probability", ascending=False).head(10)
                     st.dataframe(top10[lead + others])
 
-                    # Download button
                     csv_data = df.to_csv(index=False)
                     st.download_button(
-                        "⬇️ Download Predictions (CSV)",
+                        "Download predictions (CSV)",
                         csv_data,
                         file_name="churn_predictions.csv",
                         mime="text/csv",
@@ -240,15 +227,11 @@ if uploaded_file:
 
                 except ValueError as e:
                     st.error(f"Prediction error: {str(e)}")
-                    st.info("Check the required columns in the 'Required Data Format' section above.")
+                    st.info("Check the required columns in the 'Required data format' section above.")
                 except Exception as e:
                     st.error(f"Prediction error: {str(e)}")
-                    st.info("""
-                    **Possible solutions:**
-                    1. Check that your data has the correct format
-                    2. Ensure column values match the categories listed above
-                    3. Remove rows with missing values
-                    """)
+                    st.info("Check that the column values match the categories listed "
+                            "in 'Required data format' and that there are no missing values.")
 
     except Exception as e:
         st.error(f"Error reading CSV file: {str(e)}")
@@ -257,7 +240,7 @@ if uploaded_file:
 # =========================
 # QUICK TEST SECTION
 # =========================
-st.header("🧪 Quick Test")
+st.header("Quick test")
 with st.expander("Test with sample data"):
     if st.button("Generate test data"):
         # Five illustrative bank customers
@@ -280,7 +263,6 @@ with st.expander("Test with sample data"):
         st.write("Generated test data:")
         st.dataframe(test_data)
 
-        # Make predictions
         try:
             st.write("Prediction results:")
             st.dataframe(score(test_data))
@@ -290,8 +272,8 @@ with st.expander("Test with sample data"):
 # =========================
 # SIDEBAR
 # =========================
-st.sidebar.header("⚙️ Configuration")
-st.sidebar.markdown(f"**Model:** {type(model.steps[-1][1]).__name__}")
+st.sidebar.header("Model")
+st.sidebar.markdown(f"**Estimator:** {type(model.steps[-1][1]).__name__}")
 
 if st.sidebar.checkbox("Show technical information"):
     st.sidebar.write("**Model Details:**")
@@ -303,18 +285,12 @@ if st.sidebar.checkbox("Show technical information"):
     st.sidebar.write(f"- pandas: {pd.__version__}")
     st.sidebar.write(f"- numpy: {np.__version__}")
 
-# Instructions
-st.sidebar.header("ℹ️ Instructions")
+st.sidebar.header("How to use")
 st.sidebar.markdown("""
-1. **Prepare your data** in CSV format
-2. **Upload the file** to the application
-3. **View** the predictions
-4. **Download** the results
-
-**Common issues:**
-- Incorrect CSV format
-- Missing columns
-- Missing data
+1. Prepare a CSV file with the required columns
+2. Upload it
+3. Review the scores and risk bands
+4. Download the results
 """)
 
 # =========================
@@ -322,6 +298,6 @@ st.sidebar.markdown("""
 # =========================
 st.markdown("""
 <div class="footer">
-    Created with ❤️ by <strong>Leprince Dongmo</strong> — Powered by Machine Learning
+    Leprince Dongmo Nanda · <a href="https://ldongmon.github.io/" target="_blank">Project page</a>
 </div>
 """, unsafe_allow_html=True)
